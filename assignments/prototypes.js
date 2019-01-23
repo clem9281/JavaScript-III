@@ -69,14 +69,16 @@ Humanoid.prototype.greet = function() {
   return `${this.name} offers a greeting in ${this.language}.`;
 };
 
+// HERO CONSTRUCTOR
 const Hero = function(heroAttrs) {
   Humanoid.call(this, heroAttrs);
   this.attackPoints = heroAttrs.attackPoints;
   this.luck = heroAttrs.luck;
   this.isDestroyed = false;
 };
-
+// HERO PROTOTYPE
 Hero.prototype = Object.create(Humanoid.prototype);
+// IF HEALTH IS BELOW ZERO SET THIS.ISDESTROYED TO TRUE ELSE SET TO FALSE
 Hero.prototype.checkIfIsDestroyed = function() {
   this.isDestroyed = this.healthPoints <= 0 ? true : false;
 };
@@ -88,6 +90,7 @@ Hero.prototype.attack = function(attackee) {
   } else if (attackee.isDestroyed) {
     return `${attackee.name} is destroyed and cannot be attacked`;
   } else {
+    // DAMAGE IS BASED ON ACTION POINTS X RANDOM NUMBER FROM ZERO TO LUCK
     let damage =
       this.attackPoints * Math.floor(Math.random() * Math.floor(this.luck));
     attackee.healthPoints -= damage;
@@ -102,6 +105,7 @@ Hero.prototype.attack = function(attackee) {
   }
 };
 
+// VILLAIN CONSTRUCTOR
 const Villain = function(villainAttrs) {
   Hero.call(this, villainAttrs);
 };
@@ -152,6 +156,7 @@ const archer = new Humanoid({
   language: "Elvish"
 });
 
+// HERO
 let frodo = new Hero({
   createdAt: new Date(),
   dimensions: {
@@ -168,6 +173,7 @@ let frodo = new Hero({
   luck: 15
 });
 
+//VILLAIN
 let sauron = new Villain({
   createdAt: new Date(),
   dimensions: {
@@ -201,30 +207,37 @@ console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
 // * Create two new objects, one a villain and one a hero and fight it out with methods!
 
 window.addEventListener("DOMContentLoaded", function() {
+  // GET DOM ELEMENTS
   let heroBox = document.querySelector("#hero");
   let villainBox = document.querySelector("#villain");
   let results = document.querySelector(".results");
-  function updateBoxes() {
-    if (frodo.isDestroyed) {
-      heroBox.innerHTML = `<h2>${frodo.name}</h2><h2>DESTROYED</h2>`;
+  // THIS FUNCTION ADDS THE BOX CONTENT FOR HERO AND VILLAIN, IF EITHER IS DESTROYED DISPLAY DESTROYED
+  function updateBoxes(hero, villain) {
+    if (hero.isDestroyed) {
+      heroBox.innerHTML = `<h2>${hero.name}</h2><h2>DESTROYED</h2>`;
     } else {
-      heroBox.innerHTML = `<h2>${frodo.name}</h2><p>Health Points: ${
-        frodo.healthPoints
-      }</p><p>Attack Points: ${frodo.attackPoints}</p><p>Luck: ${frodo.luck}`;
+      heroBox.innerHTML = `<h2>${hero.name}</h2><p>Health Points: ${
+        hero.healthPoints
+      }</p><p>Attack Points: ${hero.attackPoints}</p><p>Luck: ${hero.luck}`;
     }
-    if (sauron.isDestroyed) {
-      villainBox.innerHTML = `<h2>${sauron.name}</h2><h2>DESTROYED</h2>`;
+    if (villain.isDestroyed) {
+      villainBox.innerHTML = `<h2>${villain.name}</h2><h2>DESTROYED</h2>`;
     } else {
-      villainBox.innerHTML = `<h2>${sauron.name}</h2><p>Health Points: ${
-        sauron.healthPoints
-      }</p><p>Attack Points: ${sauron.attackPoints}</p><p>Luck: ${sauron.luck}`;
+      villainBox.innerHTML = `<h2>${villain.name}</h2><p>Health Points: ${
+        villain.healthPoints
+      }</p><p>Attack Points: ${villain.attackPoints}</p><p>Luck: ${
+        villain.luck
+      }`;
     }
   }
+  // THIS FUNCTION WILL LOG RESULTS AFTER EACH HIT
   function logResults(newResult) {
     results.innerHTML += `<p>${newResult}</p>`;
   }
-  updateBoxes();
+  // SET UP BOXES TO START AND SET COUNTER TO ZERO
+  updateBoxes(frodo, sauron);
   counter = 0;
+  // WHEN THE BUTTON IS PRESSED, IF COUNTER IS EVEN THEN HERO ATTACKS, ELSE VILLAIN ATTACKS
   let button = document.querySelector("button");
   button.addEventListener("click", function() {
     function battle(hero, villain) {
@@ -237,7 +250,7 @@ window.addEventListener("DOMContentLoaded", function() {
         logResults(string);
         counter++;
       }
-      updateBoxes();
+      updateBoxes(hero, villain);
     }
     battle(frodo, sauron);
   });

@@ -7,7 +7,7 @@
   
   Each constructor function has unique properties and methods that are defined in their block comments below:
 */
-  
+
 /*
   === GameObject ===
   * createdAt
@@ -32,79 +32,226 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
- 
+
 /*
-  * Inheritance chain: GameObject -> CharacterStats -> Humanoid
-  * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
-  * Instances of CharacterStats should have all of the same properties as GameObject.
-*/
+ * Inheritance chain: GameObject -> CharacterStats -> Humanoid
+ * Instances of Humanoid should have all of the same properties as CharacterStats and GameObject.
+ * Instances of CharacterStats should have all of the same properties as GameObject.
+ */
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
+const GameObject = function(gameAttrs) {
+  this.createdAt = gameAttrs.createdAt;
+  this.dimensions = gameAttrs.dimensions;
+};
+GameObject.prototype.destroy = function() {
+  return `${this.name} was removed from game`;
+};
 
-/*
-  const mage = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 1,
-      height: 1,
-    },
-    healthPoints: 5,
-    name: 'Bruce',
-    team: 'Mage Guild',
-    weapons: [
-      'Staff of Shamalama',
-    ],
-    language: 'Common Tongue',
+const CharacterStats = function(charAttrs) {
+  GameObject.call(this, charAttrs);
+  this.healthPoints = charAttrs.healthPoints;
+  this.name = charAttrs.name;
+};
+CharacterStats.prototype = Object.create(GameObject.prototype);
+CharacterStats.prototype.takeDamage = function() {
+  return `${this.name} took damage.`;
+};
+
+const Humanoid = function(humanAttrs) {
+  CharacterStats.call(this, humanAttrs);
+  this.team = humanAttrs.team;
+  this.weapons = humanAttrs.weapons;
+  this.language = humanAttrs.language;
+};
+Humanoid.prototype = Object.create(CharacterStats.prototype);
+Humanoid.prototype.greet = function() {
+  return `${this.name} offers a greeting in ${this.language}.`;
+};
+
+// HERO CONSTRUCTOR
+const Hero = function(heroAttrs) {
+  Humanoid.call(this, heroAttrs);
+  this.attackPoints = heroAttrs.attackPoints;
+  this.luck = heroAttrs.luck;
+  this.isDestroyed = false;
+};
+// HERO PROTOTYPE
+Hero.prototype = Object.create(Humanoid.prototype);
+// IF HEALTH IS BELOW ZERO SET THIS.ISDESTROYED TO TRUE ELSE SET TO FALSE
+Hero.prototype.checkIfIsDestroyed = function() {
+  this.isDestroyed = this.healthPoints <= 0 ? true : false;
+};
+Hero.prototype.attack = function(attackee) {
+  this.checkIfIsDestroyed();
+  attackee.checkIfIsDestroyed();
+  if (this.isDestroyed) {
+    return `${this.name} is destroyed and cannot attack`;
+  } else if (attackee.isDestroyed) {
+    return `${attackee.name} is destroyed and cannot be attacked`;
+  } else {
+    // DAMAGE IS BASED ON ACTION POINTS X RANDOM NUMBER FROM ZERO TO LUCK
+    let damage =
+      this.attackPoints * Math.floor(Math.random() * Math.floor(this.luck));
+    attackee.healthPoints -= damage;
+    attackee.checkIfIsDestroyed();
+    return attackee.isDestroyed
+      ? `${this.name} did ${damage} damage to ${attackee.name}. ${
+          attackee.name
+        } is destroyed.`
+      : `${this.name} did ${damage} damage to ${attackee.name}. ${
+          attackee.name
+        } now has ${attackee.healthPoints} health remaining.`;
+  }
+};
+
+// VILLAIN CONSTRUCTOR
+const Villain = function(villainAttrs) {
+  Hero.call(this, villainAttrs);
+};
+Villain.prototype = Object.create(Hero.prototype);
+Villain.prototype.evilLaugh = function() {
+  return `Mwah Ha Ha Ha!`;
+};
+
+const mage = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 1,
+    height: 1
+  },
+  healthPoints: 5,
+  name: "Bruce",
+  team: "Mage Guild",
+  weapons: ["Staff of Shamalama"],
+  language: "Common Tongue"
+});
+
+const swordsman = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 2,
+    width: 2,
+    height: 2
+  },
+  healthPoints: 15,
+  name: "Sir Mustachio",
+  team: "The Round Table",
+  weapons: ["Giant Sword", "Shield"],
+  language: "Common Tongue"
+});
+
+const archer = new Humanoid({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 2,
+    height: 4
+  },
+  healthPoints: 10,
+  name: "Lilith",
+  team: "Forest Kingdom",
+  weapons: ["Bow", "Dagger"],
+  language: "Elvish"
+});
+
+// HERO
+let frodo = new Hero({
+  createdAt: new Date(),
+  dimensions: {
+    length: 1,
+    width: 1,
+    height: 1
+  },
+  healthPoints: 15,
+  name: "Frodo",
+  team: "The Fellowship",
+  weapons: ["Sting"],
+  language: "Common Tongue",
+  attackPoints: 2,
+  luck: 15
+});
+
+//VILLAIN
+let sauron = new Villain({
+  createdAt: new Date(),
+  dimensions: {
+    length: 20,
+    width: 20,
+    height: 20
+  },
+  healthPoints: 40,
+  name: "Sauron",
+  team: "Team Mordor",
+  weapons: ["Orcs"],
+  language: "All of them",
+  attackPoints: 10,
+  luck: 2
+});
+
+console.log(mage.createdAt); // Today's date
+console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
+console.log(swordsman.healthPoints); // 15
+console.log(mage.name); // Bruce
+console.log(swordsman.team); // The Round Table
+console.log(mage.weapons); // Staff of Shamalama
+console.log(archer.language); // Elvish
+console.log(archer.greet()); // Lilith offers a greeting in Elvish.
+console.log(mage.takeDamage()); // Bruce took damage.
+console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
+
+// Stretch task:
+// * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.
+// * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
+// * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+window.addEventListener("DOMContentLoaded", function() {
+  // GET DOM ELEMENTS
+  let heroBox = document.querySelector("#hero");
+  let villainBox = document.querySelector("#villain");
+  let results = document.querySelector(".results");
+  // THIS FUNCTION ADDS THE BOX CONTENT FOR HERO AND VILLAIN, IF EITHER IS DESTROYED DISPLAY DESTROYED
+  function updateBoxes(hero, villain) {
+    if (hero.isDestroyed) {
+      heroBox.innerHTML = `<h2>${hero.name}</h2><h2>DESTROYED</h2>`;
+    } else {
+      heroBox.innerHTML = `<h2>${hero.name}</h2><p>Health Points: ${
+        hero.healthPoints
+      }</p><p>Attack Points: ${hero.attackPoints}</p><p>Luck: ${hero.luck}`;
+    }
+    if (villain.isDestroyed) {
+      villainBox.innerHTML = `<h2>${villain.name}</h2><h2>DESTROYED</h2>`;
+    } else {
+      villainBox.innerHTML = `<h2>${villain.name}</h2><p>Health Points: ${
+        villain.healthPoints
+      }</p><p>Attack Points: ${villain.attackPoints}</p><p>Luck: ${
+        villain.luck
+      }`;
+    }
+  }
+  // THIS FUNCTION WILL LOG RESULTS AFTER EACH HIT
+  function logResults(newResult) {
+    results.innerHTML += `<p>${newResult}</p>`;
+  }
+  // SET UP BOXES TO START AND SET COUNTER TO ZERO
+  updateBoxes(frodo, sauron);
+  counter = 0;
+  // WHEN THE BUTTON IS PRESSED, IF COUNTER IS EVEN THEN HERO ATTACKS, ELSE VILLAIN ATTACKS
+  let button = document.querySelector("button");
+  button.addEventListener("click", function() {
+    function battle(hero, villain) {
+      if (counter % 2 === 0) {
+        let string = hero.attack(villain);
+        logResults(string);
+        counter++;
+      } else {
+        let string = villain.attack(hero);
+        logResults(string);
+        counter++;
+      }
+      updateBoxes(hero, villain);
+    }
+    battle(frodo, sauron);
   });
-
-  const swordsman = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 2,
-      width: 2,
-      height: 2,
-    },
-    healthPoints: 15,
-    name: 'Sir Mustachio',
-    team: 'The Round Table',
-    weapons: [
-      'Giant Sword',
-      'Shield',
-    ],
-    language: 'Common Tongue',
-  });
-
-  const archer = new Humanoid({
-    createdAt: new Date(),
-    dimensions: {
-      length: 1,
-      width: 2,
-      height: 4,
-    },
-    healthPoints: 10,
-    name: 'Lilith',
-    team: 'Forest Kingdom',
-    weapons: [
-      'Bow',
-      'Dagger',
-    ],
-    language: 'Elvish',
-  });
-
-  console.log(mage.createdAt); // Today's date
-  console.log(archer.dimensions); // { length: 1, width: 2, height: 4 }
-  console.log(swordsman.healthPoints); // 15
-  console.log(mage.name); // Bruce
-  console.log(swordsman.team); // The Round Table
-  console.log(mage.weapons); // Staff of Shamalama
-  console.log(archer.language); // Elvish
-  console.log(archer.greet()); // Lilith offers a greeting in Elvish.
-  console.log(mage.takeDamage()); // Bruce took damage.
-  console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
-
-  // Stretch task: 
-  // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
-  // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
-  // * Create two new objects, one a villain and one a hero and fight it out with methods!
+});
